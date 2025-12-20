@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  rejected
+}
+
+enum Gender {
+  male
+  female
+  uni
+}
+
+model User {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String
+  is_verified Boolean
+  otp         Int?
+  otp_expire  DateTime?
+  created_at  DateTime @default(now())
+
+  addresses Address[]
+  orders    Order[]
+}
+
+model Address {
+  id       String  @id @default(uuid())
+  user_id  String
+  region   String
+  district String?
+
+  user   User    @relation(fields: [user_id], references: [id])
+  orders Order[]
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  user_id     String
+  status      OrderStatus @default(pending)
+  total_price Float
+  address_id  String
+  admin_id    String?
+  created_at  DateTime    @default(now())
+
+  user        User        @relation(fields: [user_id], references: [id])
+  address     Address     @relation(fields: [address_id], references: [id])
+  admin       Admin?      @relation(fields: [admin_id], references: [id])
+  order_items OrderItem[]
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  products Product[]
+}
+
+model Season {
+  id       String    @id @default(uuid())
+  name     String
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  title       String
+  category_id String
+  seasons     String
+  description String
+  price       Float
+  gender      Gender
+  admin_id    String
+  weight      Float
+  created_at  DateTime @default(now())
+
+  category Category         @relation(fields: [category_id], references: [id])
+  season   Season           @relation(fields: [seasons], references: [id])
+  admin    Admin            @relation(fields: [admin_id], references: [id])
+  variants ProductVariant[]
+}
+
+model ProductVariant {
+  id         String @id @default(uuid())
+  product_id String
+  size_id    String
+  color_id   String
+
+  product     Product     @relation(fields: [product_id], references: [id])
+  size        Size        @relation(fields: [size_id], references: [id])
+  color       Color       @relation(fields: [color_id], references: [id])
+  order_items OrderItem[]
+}
+
+model Color {
+  id       String           @id @default(uuid())
+  name     String
+  code     String
+  variants ProductVariant[]
+}
+
+model Size {
+  id       String           @id @default(uuid())
+  size     Float
+  variants ProductVariant[]
+}
+
+model OrderItem {
+  id                 String @id @default(uuid())
+  order_id           String
+  product_variant_id String
+  quantity           Int
+
+  order           Order          @relation(fields: [order_id], references: [id])
+  product_variant ProductVariant @relation(fields: [product_variant_id], references: [id])
+}
+
+model Admin {
+  id         String   @id @default(uuid())
+  name       String
+  username   String
+  password   String
+  created_at DateTime @default(now())
+
+  products Product[]
+  orders   Order[]
+}
