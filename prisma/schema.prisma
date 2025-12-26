@@ -97,11 +97,10 @@ model ProductVariant {
   id         String @id @default(uuid())
   product_id String
   size_id    String
-  color_id   String
+  colors     Color[]
 
   product     Product     @relation(fields: [product_id], references: [id])
   size        Size        @relation(fields: [size_id], references: [id])
-  color       Color       @relation(fields: [color_id], references: [id])
   order_items OrderItem[]
 }
 
