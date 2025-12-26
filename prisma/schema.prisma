@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -27,11 +26,14 @@ enum Gender {
 
 model User {
   id          String   @id @default(uuid())
-  name        String
-  phone       String
-  is_verified Boolean
+  phone       String   @unique
+  name        String?
+  password    String?
+  is_verified Boolean?
   otp         Int?
   otp_expire  DateTime?
+  reg_step    Int?
+  refresh_token String? @map("refresh_token")
   created_at  DateTime @default(now())
 
   addresses Address[]
